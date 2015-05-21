@@ -1,0 +1,136 @@
+<html>
+
+<head>
+        <title>Cardboard Clouds</title>
+        <style>
+        canvas {
+                width: 100%;
+                height: 100%
+        }
+        </style>
+</head>
+
+<body>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r71/three.min.js"></script>
+        <script src="../lib/StereoEffect.js"></script>
+        <script src='../lib/THREEx.FullScreen.js'></script>
+        <script src='../lib/DeviceOrientationControls.js'></script>
+        <script src='../lib/FirstPersonControls.js'></script>
+        <script>
+        var clock = new THREE.Clock();
+
+        // Scene
+        var scene = new THREE.Scene();
+        scene.fog = new THREE.Fog(0xf0f0f0, 1, 2000);
+        stereoscopic = true;
+
+        // Camera
+        var camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 100000);
+        camera.position.z = 1000;
+        scene.add(camera);
+
+        // Renderer
+        var renderer = new THREE.WebGLRenderer({
+                antialias: true
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0xadd8e6); // Background Color
+        renderer.shadowMapEnabled = true;
+        document.body.appendChild(renderer.domElement);
+
+        // Full Screen
+        var fullscreen = false;
+        document.addEventListener('touchend', function() {
+                if (!fullscreen) {
+                        if (document.documentElement.requestFullscreen) {
+                                document.documentElement.requestFullscreen();
+                        } else if (document.documentElement.msRequestFullscreen) {
+                                document.documentElement.msRequestFullscreen();
+                        } else if (document.documentElement.mozRequestFullScreen) {
+                                document.documentElement.mozRequestFullScreen();
+                        } else if (document.documentElement.webkitRequestFullscreen) {
+                                document.documentElement.webkitRequestFullscreen();
+                        }
+                        fullscreen = true;
+                }
+        }, false);
+
+        // Orientation Controls
+        var orientationControls = new THREE.DeviceOrientationControls(camera);
+        orientationControls.connect();
+
+        // FPS Controls
+        controls = new THREE.FirstPersonControls(camera);
+        controls.movementSpeed = 1000;
+        controls.lookSpeed = 0.125;
+        controls.lookVertical = true;
+
+
+        // Sterioscopic Effect
+        if (stereoscopic) {
+                var effect = new THREE.StereoEffect(renderer);
+                effect.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // Particles
+        geometry = new THREE.Geometry();
+
+        sprite = THREE.ImageUtils.loadTexture("images/cloud10.png");
+        <!--sprite.alphaTest = 0.1;-->
+        sprite.minFilter = THREE.NearestFilter;
+        sprite.opacity = 1;
+
+        for (i = 0; i < 1000; i++) {
+
+                var vertex = new THREE.Vector3();
+                vertex.x = 5000 * Math.random() - 1000;
+                vertex.y = 5000 * Math.random() - 5000;
+                vertex.z = 5000 * Math.random() - 1000;
+
+                geometry.vertices.push(vertex);
+
+        }
+
+        material = new THREE.PointCloudMaterial({
+                alphaTest: 0.5,
+                size: 1000,
+                sizeAttenuation: true,
+                map: sprite,
+                blending: THREE.NormalBlending,
+                transparent: true,
+                fog: false 
+        });
+        particles = new THREE.PointCloud(geometry, material);
+        <!--particles.sortParticles = true;-->
+        scene.add(particles);
+
+
+        // Animations
+        var last = 0;
+        var render = function() {
+                requestAnimationFrame(render);
+                if (stereoscopic) {
+                        orientationControls.update(clock.getDelta());
+                        camera.translateZ(-10);
+                        effect.render(scene, camera);
+                } else {
+                        controls.update(clock.getDelta());
+                        renderer.render(scene, camera);
+                }
+        }
+
+        // Resize Window
+        window.addEventListener('resize', onWindowResize, false);
+
+        function onWindowResize() {
+                camera.aspect = window.innerWidth / window.innerHeight; // Correct Aspect Ratio
+                camera.updateProjectionMatrix(); // Update the Projection (scales correctly)
+                renderer.setSize(window.innerWidth, window.innerHeight); // Reset Size of Renderer
+                if (stereoscopic) {
+                        effect.setSize(window.innerWidth, window.innerHeight);
+                }
+        }
+        controls.handleResize();
+        render();
+        </script>
+</body>
