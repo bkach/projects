@@ -13,7 +13,7 @@ Source code for projects
 
 [HoopsStereo](https://bobridgevan.com/projects/hoopsStereo)
 
-[marble](https://bobridgevan.com/projects/marble)
+[marble](https://bobridgevan.com/projects/marble/marble)
 
 [Period displacement](https://bobridgevan.com/projects/periodDisplacement)
 
